@@ -30,7 +30,6 @@ class LoadCSVCommand extends Command
         foreach($csv as $k => $v) {
             $v = implode('', $v);
             if ($this->isInvalidSyntax($v)) {
-                $output->writeln($v);
                 $invalidEmailsSyntax[] = $v;
                 continue;
             }
@@ -40,14 +39,25 @@ class LoadCSVCommand extends Command
             }
             $validEmails[] = $v;
         }
+        $this->saveCSV($validEmails, 'validemails.csv');
+        $this->saveCSV($invalidEmailsSyntax, 'invalidemails.csv');
         return Command::SUCCESS;
     }
 
     public function isInvalidSyntax($email){
         return (filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE);
     }
+    
     public function isInvalidHost($email){
         $domain = substr($email, strpos($email, '@') + 1);
         return (checkdnsrr($domain) === FALSE);
+    }
+
+    public function saveCSV($data, $file){
+        $fp = fopen($file, 'w');
+        foreach ($data as $row) {
+            fputcsv($fp, (array) $row);
+        }
+        fclose($fp);
     }
 }
