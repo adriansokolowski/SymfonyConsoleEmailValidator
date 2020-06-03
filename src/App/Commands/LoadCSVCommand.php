@@ -29,22 +29,25 @@ class LoadCSVCommand extends Command
         }
         foreach($csv as $k => $v) {
             $v = implode('', $v);
-            if (filter_var($v, FILTER_VALIDATE_EMAIL)) {
-                $domain = substr($v, strpos($v, '@') + 1);
-                if  (checkdnsrr($domain) !== FALSE) {
-                    $validEmails[] = $v;
-                } else {
-                    $invalidEmailsHost[] = $v;
-                }
-            } else {
-                $invalidEmailsSyntax[] = $v;
+            if ($this->isInvalidSyntax($v)) {
                 $output->writeln($v);
+                $invalidEmailsSyntax[] = $v;
+                continue;
             }
+            if ($this->isInvalidHost($v)) {
+                $invalidEmailsHost[] = $v;
+                continue;
+            }
+            $validEmails[] = $v;
         }
-
         return Command::SUCCESS;
     }
 
-
-
+    public function isInvalidSyntax($email){
+        return (filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE);
+    }
+    public function isInvalidHost($email){
+        $domain = substr($email, strpos($email, '@') + 1);
+        return (checkdnsrr($domain) === FALSE);
+    }
 }
