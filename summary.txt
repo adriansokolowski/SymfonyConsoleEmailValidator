@@ -1,0 +1,5 @@
+Total emails checked: 1546
+Total valid emails: 341
+Total invalid emails: 1205
+Emails with invalid syntax: 1126
+Emails with invalid email provider: 79

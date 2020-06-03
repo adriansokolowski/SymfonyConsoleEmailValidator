@@ -22,6 +22,7 @@ class LoadCSVCommand extends Command
         $rows = array_map('str_getcsv', file($input->getArgument('file')));
         $csv = [];
         $validEmails = [];
+        $invalidEmails = [];
         $invalidEmailsSyntax = [];
         $invalidEmailsHost = [];
         foreach($rows as $row) {
@@ -31,23 +32,34 @@ class LoadCSVCommand extends Command
             $v = implode('', $v);
             if ($this->isInvalidSyntax($v)) {
                 $invalidEmailsSyntax[] = $v;
+                $invalidEmails[] = $v;
                 continue;
             }
             if ($this->isInvalidHost($v)) {
                 $invalidEmailsHost[] = $v;
+                $invalidEmails[] = $v;
                 continue;
             }
             $validEmails[] = $v;
         }
         $this->saveCSV($validEmails, 'validemails.csv');
-        $this->saveCSV($invalidEmailsSyntax, 'invalidemails.csv');
+        $this->saveCSV($invalidEmails, 'invalidemails.csv');
+
+        $summaryFile = fopen("summary.txt", "w");
+        fwrite($summaryFile, "Total emails checked: " . count($csv) . "\n");
+        fwrite($summaryFile, "Total valid emails: " . count($validEmails) . "\n");
+        fwrite($summaryFile, "Total invalid emails: " . count($invalidEmails) . "\n");
+        fwrite($summaryFile, "Emails with invalid syntax: " . count($invalidEmailsSyntax) . "\n");
+        fwrite($summaryFile, "Emails with invalid email provider: " . count($invalidEmailsHost) . "\n");
+        fclose($summaryFile);
+
         return Command::SUCCESS;
     }
 
     public function isInvalidSyntax($email){
         return (filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE);
     }
-    
+
     public function isInvalidHost($email){
         $domain = substr($email, strpos($email, '@') + 1);
         return (checkdnsrr($domain) === FALSE);
