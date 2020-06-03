@@ -18,7 +18,31 @@ class LoadCSVCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-       $output->writeln(sprintf('File is , %s', $input->getArgument('file')));
-       return Command::SUCCESS;
+        $output->writeln('Loaded file: ' . $input->getArgument('file'));
+        $array = $fields = array(); 
+        $i = 0;
+        $handle = @fopen($input->getArgument('file'), "r");
+        if ($handle) {
+            while (($row = fgetcsv($handle, 4096)) !== false) {
+                if (empty($fields)) {
+                    $fields = $row;
+                    continue;
+                }
+                foreach ($row as $k=>$value) {
+                    $array[$i][$fields[$k]] = $value;
+                    $output->writeln($array[$i][$fields[$k]]);
+                }
+                $i++;
+            }
+            if (!feof($handle)) {
+                echo "Error: unexpected fgets() fail\n";
+            }
+            fclose($handle);
+        }
+
+        return Command::SUCCESS;
     }
+
+
+
 }
