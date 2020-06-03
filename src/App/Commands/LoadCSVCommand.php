@@ -36,13 +36,12 @@ class LoadCSVCommand extends Command
                 } else {
                     $invalidEmailsHost[] = $v;
                 }
-                $validEmails[] = $v;
             } else {
                 $invalidEmailsSyntax[] = $v;
                 $output->writeln($v);
             }
         }
-        
+
         return Command::SUCCESS;
     }
 
