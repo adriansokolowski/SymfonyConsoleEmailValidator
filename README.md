@@ -1,4 +1,4 @@
-# zad3
+# Validate Emails from csv file
 ```bash
 php bin/console.php loadcsv data.csv
 ```
